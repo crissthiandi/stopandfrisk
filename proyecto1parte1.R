@@ -31,6 +31,9 @@ a=as.data.frame(table(base$sex,useNA = "ifany"))
 
 sexo<-ifelse(base$sex=="1","Hombre","Mujer")
 
+# graficas ----------------------------------------------------------------
+
+
 ggplot(base) + 
   geom_bar(mapping = aes(x = sexo, y = ..prop.., group = 1), fill="Pink", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
@@ -43,10 +46,10 @@ ggplot(base) +
 sum(base$sex, na.rm = T)/(685724-12110) #porcentaje de hombres detenidos
 
 base$race=as.factor(base$race)
-levels(base$race)= c("Negro","NegroHispano","BlancoHispano","Blanco","Asia","India")
+levels(base$race)= c("Negro","NegroHispano","BlancoHispano","Blanco","Asiatico","Nativo Am.")
 
 ggplot(base) + 
-  geom_bar(mapping = aes(x = race, y = ..prop.., group = 1),fill="pink", stat = "count") + 
+  geom_bar(mapping = aes(x = race, y = ..prop.., group = 1),fill="red3", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
   labs(x="Raza",y="Porcentaje")+ggtitle("Raza de las personas detenidas")
 #Porcentajes según raza
@@ -57,7 +60,7 @@ nrow(subset(base,race=="4"))/(685724-22607)
 nrow(subset(base,race=="5"))/(685724-22607)
 nrow(subset(base,race=="6"))/(685724-22607)
 
-cachear<-ifelse(base$searched=="1","Si","No")
+cachear<-ifelse(base$frisked=="1","Si","No")
 ggplot(base) + 
   geom_bar(mapping = aes(x = cachear, y = ..prop.., group = 1),fill="pink", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
@@ -209,8 +212,28 @@ p=unique(base$age)
 plot(sort(p))
 p=base$age
 length(p[(14>=p | p>=90)])
+length(p[(14>=p)])
+length(p[(p>=90)])
 
-#221 valores unicos daÃ±ados
+hist(p[(14>=p)])
+hist(p[(p>=90)])
+
+
+
+# plot edades -------------------------------------------------------------
+
+p=sort(unique(base$age))
+plotear=data.frame(equis=seq_along(p),ye=p)
+
+ggplot(plotear)+geom_line(aes(x=equis,y=ye),size=2,lineend="round",alpha=0.8)+
+  labs(x="Valores",y="Edad" )+
+  ggtitle("Valores unicos de la Variable Edad")+
+  theme(plot.title = element_text(hjust = 0.5),axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13))
+
+
+
+#221 valores unicos dañados
 #es decir solo 83 edades correctas
 
 length(base$age[(base$age<100 & base$age< 15)])
@@ -225,6 +248,18 @@ max(p) #aunque 95 pulgadas es mucho, no es mayor al recor mundial
 min(p) #auque 36 es menos de 1 metro, una persona enana podria tener estas caracteristicas
 
 plot(p)
+
+# peso y altura plots -----------------------------------------------------
+
+p=sort(p)
+plotear=data.frame(equis=seq_along(p),ye=p)
+
+ggplot(plotear)+geom_line(aes(x=equis,y=ye),size=2,lineend="round",alpha=0.8)+
+  labs(x="Valores",y="Alturas" )+
+  ggtitle("Valores unicos de la Variable Altura")+
+  theme(plot.title = element_text(hjust = 0.5),axis.title = element_text(size = 15),
+        axis.text = element_text(size = 13))+geom_hline(yintercept = c(40,80),colour="red3")
+  
 lines(y=rep(40,times=60),seq_len(60),col='red') #altura maxima promedio
 lines(y=rep(80,times=60),seq_len(60),col='red') #altura minima promedio
 
