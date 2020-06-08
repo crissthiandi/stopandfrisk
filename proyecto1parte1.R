@@ -18,6 +18,8 @@
 #Referencias Bibliográficas
 
 library(ggplot2)
+library(dplyr)
+
 
 setwd("c:/Users/Acer E15/Google Drive/semestre 8/Mineria de datos/Proyecto final/")
 base <- read.csv("../Proyecto/StopandFrisk2011.csv")
@@ -43,6 +45,7 @@ ggplot(base) +
   coord_flip()
 
 
+
 sum(base$sex, na.rm = T)/(685724-12110) #porcentaje de hombres detenidos
 
 base$race=as.factor(base$race)
@@ -51,14 +54,18 @@ levels(base$race)= c("Negro","NegroHispano","BlancoHispano","Blanco","Asiatico",
 ggplot(base) + 
   geom_bar(mapping = aes(x = race, y = ..prop.., group = 1),fill="red3", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
-  labs(x="Raza",y="Porcentaje")+ggtitle("Raza de las personas detenidas")
+  labs(x="Raza",y="Porcentaje")+ggtitle("Raza de las personas detenidas")+
+  coord_flip()+theme(plot.title = element_text(size=16),
+                     axis.title = element_text(size = 15),
+                     axis.text = element_text(size = 13))
+
 #Porcentajes según raza
-nrow(subset(base,race=="1"))/(685724-22607)
-nrow(subset(base,race=="2"))/(685724-22607)
-nrow(subset(base,race=="3"))/(685724-22607)
-nrow(subset(base,race=="4"))/(685724-22607)
-nrow(subset(base,race=="5"))/(685724-22607)
-nrow(subset(base,race=="6"))/(685724-22607)
+nrow(subset(base,race=="Negro"))/(685724-22607)
+nrow(subset(base,race=="NegroHispano"))/(685724-22607)
+nrow(subset(base,race=="BlancoHispano"))/(685724-22607)
+nrow(subset(base,race=="Blanco"))/(685724-22607)
+nrow(subset(base,race=="Asiatico"))/(685724-22607)
+nrow(subset(base,race=="Nativo Am."))/(685724-22607)
 
 cachear<-ifelse(base$frisked=="1","Si","No")
 ggplot(base) + 
@@ -66,21 +73,93 @@ ggplot(base) +
   scale_y_continuous(labels = scales::percent_format())+
   labs(x="¿Se cacheo al detenido?",y="Porcentaje")+ggtitle("Cacheo de las personas detenidas")
 
+nrow(subset(base,frisked=="1"))/(685724-22607)
+nrow(subset(base,frisked=="0"))/(685724-22607)
+
+
 contrabando<-ifelse(base$contrabn=="1","Si","No")
 ggplot(base) + 
   geom_bar(mapping = aes(x = contrabando, y = ..prop.., group = 1),fill="yellow", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
   labs(x="¿Se encontró artículos de contrabando?",y="Porcentaje")+ggtitle("Contrabando de las personas detenidas")
 
+nrow(subset(base,contrabn=="1"))/(length(!is.na(base$contrabn)))
+nrow(subset(base,contrabn=="0"))/(length(!is.na(base$contrabn)))
+
+
+
 pistola<-ifelse(base$pistol=="1","Si","No")
 ggplot(base) + 
   geom_bar(mapping = aes(x = pistola, y = ..prop.., group = 1),fill="darkred", stat = "count") + 
   scale_y_continuous(labels = scales::percent_format())+
-  labs(x="¿Se le encontró una pístola a la persona detenida?",y="Conteo")+ggtitle("Presencia de pistola")
+  labs(x="¿Se le encontró una pístola a la persona detenida?",y="Porcentaje")+ggtitle("Presencia de pistola")
+
+nrow(subset(base,pistol=="1"))/(length(!is.na(base$pistol)))
+nrow(subset(base,pistol=="0"))/(length(!is.na(base$pistol)))
+
+
 
 arresto<-ifelse(base$arstmade=="1","Si","No")
-ggplot(base)+geom_bar(aes(x=arresto), fill="orange")+
-  labs(x="¿Se arrestó a la persona detenida?",y="Conteo")+ggtitle("Arresto")
+ggplot(base)+geom_bar(aes(x=arresto, y=..prop.., group=1), fill="orange",
+                       stat = "count") + 
+  scale_y_continuous(labels = scales::percent_format())+
+  labs(x="¿Se arrestó a la persona detenida?",y="Porcentaje")+ggtitle("Arresto")
+
+
+
+# plots bivariadas --------------------------------------------------------
+
+base2<-arrange(base,arstmade) 
+base2$arstmade<- as.factor(base2$arstmade)
+levels(base2$arstmade)<-c("No arresto", "Sí arresto")
+base2=subset(base2,!is.na(race))
+
+ggplot(base2, aes(fill=arstmade, y= frisked, x=race)) + 
+  geom_bar(position="stack", stat="identity")+
+  #scale_fill_viridis(discrete = T) +
+  #scale_y_continuous(labels = scales::percent_format())+
+  ggtitle("Personas cacheadas que fueron arrestadas por etnia") +
+  xlab("Raza")+ylab("Cantidad de personas cacheadas")+
+  labs(fill = "¿Hubo arresto?")+
+  coord_flip()+theme(plot.title = element_text(size=16),
+                     axis.title = element_text(size = 15),
+                     axis.text = element_text(size = 13))
+
+#comprobando lo anterior
+nrow(subset(base,race=="Negro" & frisked=="1" ))
+nrow(subset(base,race=="BlancoHispano" & frisked=="1" ))
+
+nrow(subset(base,race=="Negro" & frisked=="1" & arstmade=="1" ))/nrow(subset(base,race=="Negro" & frisked=="1" ))
+nrow(subset(base,race=="BlancoHispano" & frisked=="1" & arstmade=="1" ))/nrow(subset(base,race=="BlancoHispano" & frisked=="1" ))
+
+
+
+#función cris
+base2$forceuse=indicador(subset(x=base2,select = 34:42))
+
+base2=subset(base2,select = c(arstmade,frisked,forceuse,race))
+base2$forceuse=as.factor(base2$forceuse)
+levels(base2$forceuse)=c("No hubo","Si hubo")
+
+ggplot(base2, aes(fill=forceuse, y= frisked, x=race)) + 
+  geom_bar(position="stack", stat="identity")+
+  #scale_fill_viridis(discrete = T) +
+  #scale_y_continuous(labels = scales::percent_format())+
+  ggtitle("Personas cacheadas con uso de Fuerza por etnia") +
+  xlab("Etnia")+ylab("Cantidad de personas cacheadas")+
+  labs(fill = "¿Uso de fuerza?")+
+  coord_flip()+theme(plot.title = element_text(size=16),
+                     axis.title = element_text(size = 15),
+                     axis.text = element_text(size = 13))
+
+#comprobando lo anterior
+nrow(subset(base,race=="Negro" & frisked=="1" ))
+nrow(subset(base,race=="BlancoHispano" & frisked=="1" ))
+
+nrow(subset(base2,race=="Negro" & frisked=="1" & forceuse=="Si hubo" ))/nrow(subset(base,race=="Negro" & frisked=="1"  ))
+nrow(subset(base2,race=="BlancoHispano" & frisked=="1" & forceuse=="No hubo" ))/nrow(subset(base,race=="BlancoHispano" & frisked=="1" ))
+
+
 
 #empezamos con el analisis
 unique(base$year)
@@ -229,7 +308,8 @@ ggplot(plotear)+geom_line(aes(x=equis,y=ye),size=2,lineend="round",alpha=0.8)+
   labs(x="Valores",y="Edad" )+
   ggtitle("Valores unicos de la Variable Edad")+
   theme(plot.title = element_text(hjust = 0.5),axis.title = element_text(size = 15),
-        axis.text = element_text(size = 13))
+        axis.text = element_text(size = 13))+
+  geom_hline(yintercept = c(14,90),colour="red3")
 
 
 
@@ -258,7 +338,8 @@ ggplot(plotear)+geom_line(aes(x=equis,y=ye),size=2,lineend="round",alpha=0.8)+
   labs(x="Valores",y="Alturas" )+
   ggtitle("Valores unicos de la Variable Altura")+
   theme(plot.title = element_text(hjust = 0.5),axis.title = element_text(size = 15),
-        axis.text = element_text(size = 13))+geom_hline(yintercept = c(40,80),colour="red3")
+        axis.text = element_text(size = 13))+
+  geom_hline(yintercept = c(40,80),colour="red3")
   
 lines(y=rep(40,times=60),seq_len(60),col='red') #altura maxima promedio
 lines(y=rep(80,times=60),seq_len(60),col='red') #altura minima promedio
