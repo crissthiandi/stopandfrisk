@@ -1,47 +1,181 @@
-library(cluster) #Hacer analisis de clusters
+library(cluster) #Hacer análisis de clusters
 library(factoextra) #Visualizar el cluster
+library(dplyr) ##se usar? para la funcion select
 #####
-#Cluster Particionamiento
-###Cuando cargamos la base de datos desde .csv podemos etiquetar los registros con los nombres
-### y evitamos tener que poner etiqueta
+setwd("~/Semestre 6.8/Mineria de Datos/proyecto/Parte 2")
 base<-read.csv("StopandFrisk2011.csv")
-base=baseoriginal
 #base<-na.omit(base)
 #View(base)
-filas<-nrow(base)
-muestra<-sample.int(n=filas,size=filas*.1,replace = F)
-train<-base[muestra,]
+##### 
+######clasificamos a los detenidos por semana del año #uso de merge en la base
+date<-unique(base$datestop)
+date
+nm<-seq.int(from = 1, to = 365)
+nm
+ab<-data.frame(date,nm)
+ab$week<-floor(((ab$nm+6)/7))
+ab
+ab$week[365]=52
+ab<-select(ab,-nm)
+base<-merge(base,ab,by.x = "datestop",by.y = "date") 
 
-base2<-train[,c(8,66,67,68,69,70,71,72,73,96,97)]
-base2<-na.omit(base2)
-base2[,2:11]<-scale(base2[,2:11])
+#####
+######creamos vectores vacios para rellenar con la informacion de las variables
+semana<-seq.int(from = 1, to = 52)
+d=nrow(base)
+detn<-rep(0,52) #detenidos arstmade
+detncris=rep(0,52)
+v1<-rep(0,52)
+v2<-rep(0,52)
+v3<-rep(0,52)
+v4<-rep(0,52)
+v5<-rep(0,52)
+v6<-rep(0,52)
+v7<-rep(0,52)
+v8<-rep(0,52)
+v9<-rep(0,52)
+v10<-rep(0,52)
 
-datos=base2[,2:11]
 
-fviz_nbclust(x = datos, FUNcluster = kmeans, method = "wss", k.max = 15, 
-             diss = get_dist(datos, method = "binary"), nstart = 50)
+#####
+#creación de las base de datos
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      detn[i]=detn[i]+1
+    }
+  }
+}
 
 
-clustermedia <- kmeans(base2[,2:11], centers=6) #centers es el número de clusters
+detncris=base %>% count(week)
 
-fviz_cluster(clustermedia, base2[,2:11], geom = "point")
-fviz_cluster(clustermedia, base2[,2:11], geom = "text")
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v1[i]=v1[i]+base$cs_objcs[j]
+    }
+  }
+}
+
+#mejora cris
+
+v1cris=NULL
+v1cris= base %>% group_by(week) %>% count(cs_objcs) %>% filter(cs_objcs==1)
+v1cris
+
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v2[i]=v2[i]+base$cs_descr[j]
+    }
+  }
+}
+
+v2cris=NULL
+v1cris= base %>% group_by(week) %>% count(cs_objcs) %>% filter(cs_objcs==1)
+v1cris
 
 
-d <- dist(base2[,2:11], method = "binary")
+
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v3[i]=v3[i]+base$cs_casng[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v4[i]=v4[i]+base$cs_lkout[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v5[i]=v5[i]+base$cs_cloth[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v6[i]=v6[i]+base$cs_drgtr[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v7[i]=v7[i]+base$cs_furtv[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v8[i]=v8[i]+base$cs_vcrim[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v9[i]=v9[i]+base$cs_bulge[j]
+    }
+  }
+}
+for (i in 1:52) {
+  for (j in 1:d) {
+    if(base$week[j]==i){
+      v10[i]=v10[i]+base$cs_other[j]
+    }
+  }
+}
+
+base1<-data.frame(semana,detn,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10)
+colnames(base1)<-c("semana","num_det","cs_objcs","cs_descr","cs_casng","cs_lkout","cs_cloth","cs_drgtr","cs_furtv","cs_vcrim","cs_bulge","cs_other")
+base1[,2:12]<-scale(base1[,2:12])#estandarizamos los datos
+
+#####
+
+
+clustermedia <- kmeans(base1[,2:12], centers=6) #centers es el número de clusters
+####no se si dividir en 6 ya que la variable Race toma 6 valores
+
+fviz_cluster(clustermedia, base1[,2:12], geom = "point")
+fviz_cluster(clustermedia, base1[,2:12], geom = "text")
+
+d <- dist(base1, method = "euclidean")
 # Clustering jerárquico usando enlace completo
 cluster1 <- hclust(d, method = "complete" )
 # Plot the obtained dendrogram
-plot(cluster1, cex = 0.6, hang = -1,labels=base2$race) #Hang sirve para indicar donde se colocan las etiquetas y labels para poner las etiquetas de las hojas
+plot(cluster1, cex = 0.6, hang = -1,labels=base1$semana) #Hang sirve para indicar donde se colocan las etiquetas y labels para poner las etiquetas de las hojas
 
 
 #####
 ##Método Agnes
-cluster2 <- agnes(base2, method = "single")
-pltree(cluster2, cex = 0.6, hang = -1, main = "Dendograma AGNES",labels=datos$Name)
+cluster2 <- agnes(base1, method = "single")
+pltree(cluster2, cex = 0.6, hang = -1, main = "Dendograma AGNES",labels=base1$semana)
 rect.hclust(cluster2,k=6,border=2:20)
 #####
 #Método Diana
-cluster3 <- diana(base2, metric = "average")
-pltree(cluster3, cex = 0.6, hang = -1, main = "Dendograma DIANA",labels=datos$Name)
+cluster3 <- diana(base1, metric = "average")
+pltree(cluster3, cex = 0.6, hang = -1, main = "Dendograma DIANA",labels=base1$semana)
 rect.hclust(cluster3,k=6,border=2:20)
+
+######
+#cortamos el arbol
+clust<-cutree(cluster3,k=6)
+fviz_cluster(list(data = base1[,2:12], cluster = clust,geom="text"))
+####Visualizar el cluster recortado
+
+##cluster basado en densidades
+library(fpc)
+library(dbscan)
+cluster5 <- fpc::dbscan(base1[,2:12] eps = .15, MinPts = 5)
+fviz_cluster(cluster5, base1[,2:12], stand = FALSE, ellipse=T)
+
+plot.dbscan(cluster5, base1[,2:12], main = "DBSCAN", frame = FALSE)##No corre !!
