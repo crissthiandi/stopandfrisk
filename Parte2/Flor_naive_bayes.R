@@ -1,17 +1,12 @@
 # NAIVE BAYES #
 
-#Instalar paqueterías
-# install.packages("naivebayes")
-# install.packages("e1071")
-# install.packages("caret")
-installed.packages("caret")
-
 #Librerías requeridas
 library(e1071)
 library(naivebayes)
 library(forcats)
 library(dplyr)
 library(caret)   #Para la matriz de confusión
+
 baseoriginal=read.csv("../Proyecto/StopandFrisk2011.csv")
 names(baseoriginal)
 base=baseoriginal[,c(7,8,15,17,26,6)]
@@ -23,10 +18,8 @@ cols<- c("frisked","sex","race","build","arstmade","borough")
 base[cols]<-lapply(base[cols], as.factor)
 
 levels(base$sex)<-c("Mujer", "Hombre")
-#sex[is.na(sex)]<-"Hombre" #???????? what?
 
 levels(base$race)<-c("Black", "Black Hispanic", "White Hispanic", "White", "Asian/Pacific Islander", "Am. Indian/ Native Alaska")
-#race[is.na(race)]<-"Black"
 
 levels(base$build)<-c("Heavy", "Muscular", "Medium", "Thin")
 
@@ -47,18 +40,17 @@ base2=base2 %>% mutate(race = fct_recode(race,
                                         ))
 
 str(base2)
-#build[is.na(build)]<-"Heavy"
 
 ###se divide en el grupo de prueba y de entrenamiento
 set.seed(1500)
-index<-sample(1:nrow(base),0.3*nrow(base2),replace=FALSE) 
+index<-sample(1:nrow(base),0.2*nrow(base2),replace=FALSE) 
 train<-base2[-index,cols] #Conjunto de datos de entrenamiento
 test<-base2[index,cols]
 
 
 #Modelo Naive Bayes
 
-NB<-naiveBayes(ars~race+frisked+build+sex,data=train)
+NB<-naiveBayes(arstmade~race+frisked+build+sex,data=train)
 NB
 
 #Matriz de confusion
@@ -70,27 +62,3 @@ confusionMatrix(tab)#Para visualizar
 
 
 
-# "https://drive.google.com/file/d/1dtIPa3_ZyrBDhAzXtARApJrBB2NcRjlW/view?usp=sharing"
-# 
-# 
-# id <- "1dtIPa3_ZyrBDhAzXtARApJrBB2NcRjlW" # Google file ID taken from above
-# datosoriginal <- read.csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id),header=T,sep=',')
-# 
-# 
-# 
-# 
-id=   "1dtIPa3_ZyrBDhAzXtARApJrBB2NcRjlW"
-
-id="1v9rPTILgHAGpxhd4ZRQrDy3nHRdAVtY-"
-
-#id <- "1dtIPa3_ZyrBDhAzXtARApJrBB2NcRjlW" # Google file ID taken from above
-datosoriginal <- read.csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id))
-# 
-#https://drive.google.com/file/d/1dtIPa3_ZyrBDhAzXtARApJrBB2NcRjlW/view?usp=sharing
-
-#https://drive.google.com/file/d/1v9rPTILgHAGpxhd4ZRQrDy3nHRdAVtY-/view?usp=sharing
-
-
-#version drobox
-
-datosoriginal = read.csv("https://www.dropbox.com/s/oli3f38k1hv6d94/StopandFrisk2011.csv?dl=1")
