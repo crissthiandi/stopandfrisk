@@ -73,8 +73,8 @@ for (i in 1:52) {
 }
 
 v2cris=NULL
-v1cris= base %>% group_by(week) %>% count(cs_objcs) %>% filter(cs_objcs==1)
-v1cris
+v2cris= base %>% group_by(week) %>% count(cs_descr) %>% filter(cs_descr==1)
+v2cris
 
 
 
@@ -85,6 +85,11 @@ for (i in 1:52) {
     }
   }
 }
+
+v3cris=NULL
+v3cris= base %>% group_by(week) %>% count(cs_casng) %>% filter(cs_casng==1)
+v3cris
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -92,6 +97,13 @@ for (i in 1:52) {
     }
   }
 }
+
+v4cris=NULL
+v4cris= base %>% group_by(week) %>% count(cs_lkout) %>% filter(cs_lkout==1)
+v4cris
+
+
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -99,6 +111,12 @@ for (i in 1:52) {
     }
   }
 }
+
+v5cris=NULL
+v5cris= base %>% group_by(week) %>% count(cs_cloth) %>% filter(cs_cloth==1)
+v5cris
+
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -106,6 +124,11 @@ for (i in 1:52) {
     }
   }
 }
+
+v6cris=NULL
+v6cris= base %>% group_by(week) %>% count(cs_drgtr) %>% filter(cs_drgtr==1)
+v6cris
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -113,6 +136,11 @@ for (i in 1:52) {
     }
   }
 }
+
+v7cris=NULL
+v7cris= base %>% group_by(week) %>% count(cs_furtv) %>% filter(cs_furtv==1)
+v7cris
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -120,6 +148,11 @@ for (i in 1:52) {
     }
   }
 }
+
+v8cris=NULL
+v8cris= base %>% group_by(week) %>% count(cs_vcrim) %>% filter(cs_vcrim==1)
+v8cris
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -127,6 +160,11 @@ for (i in 1:52) {
     }
   }
 }
+
+v9cris=NULL
+v9cris= base %>% group_by(week) %>% count(cs_bulge) %>% filter(cs_bulge==1)
+v9cris
+
 for (i in 1:52) {
   for (j in 1:d) {
     if(base$week[j]==i){
@@ -135,11 +173,22 @@ for (i in 1:52) {
   }
 }
 
+v10cris=NULL
+v10cris= base %>% group_by(week) %>% count(cs_other) %>% filter(cs_other==1)
+v10cris
+
 base1<-data.frame(semana,detn,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10)
 colnames(base1)<-c("semana","num_det","cs_objcs","cs_descr","cs_casng","cs_lkout","cs_cloth","cs_drgtr","cs_furtv","cs_vcrim","cs_bulge","cs_other")
 base1[,2:12]<-scale(base1[,2:12])#estandarizamos los datos
 
-#####
+#modificación de cris
+
+base1cris<-data.frame(semana,detncris$n,v1cris$n,v2cris$n,v3cris$n,v4cris$n,v5cris$n,v6cris$n,v7cris$n,v8cris$n,v9cris$n,v10cris$n)
+colnames(base1cris)<-c("semana","num_det","cs_objcs","cs_descr","cs_casng","cs_lkout","cs_cloth","cs_drgtr","cs_furtv","cs_vcrim","cs_bulge","cs_other")
+base1cris[,2:12]<-scale(base1cris[,2:12])#estandarizamos los datos
+
+##### Se modifica lo siguiente con solo cambiar la base
+base1=base1cris
 
 
 clustermedia <- kmeans(base1[,2:12], centers=6) #centers es el número de clusters
