@@ -43,7 +43,7 @@ str(base2)
 
 ###se divide en el grupo de prueba y de entrenamiento
 set.seed(1500)
-index<-sample(1:nrow(base),0.2*nrow(base2),replace=FALSE) 
+index<-sample(1:nrow(base),0.3*nrow(base2),replace=FALSE) 
 train<-base2[-index,cols] #Conjunto de datos de entrenamiento
 test<-base2[index,cols]
 
@@ -55,7 +55,7 @@ NB
 
 #Matriz de confusion
 predicciones<-predict(NB,newdata=test) #Realiza la prediccion
-tab<-table(predicción=predicciones,Valores_reales=test$frisked) #Para visualizar
+tab<-table(predicción=predicciones,Valores_reales=test$arstmade) #Para visualizar
 plot(predicciones)
 tab
 confusionMatrix(tab)#Para visualizar

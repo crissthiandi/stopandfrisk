@@ -187,11 +187,13 @@ base1cris<-data.frame(semana,detncris$n,v1cris$n,v2cris$n,v3cris$n,v4cris$n,v5cr
 colnames(base1cris)<-c("semana","num_det","cs_objcs","cs_descr","cs_casng","cs_lkout","cs_cloth","cs_drgtr","cs_furtv","cs_vcrim","cs_bulge","cs_other")
 base1cris[,2:12]<-scale(base1cris[,2:12])#estandarizamos los datos
 
-##### Se modifica lo siguiente con solo cambiar la base
+##### Se modifica todo lo que sigue con solo cambiar la base
 base1=base1cris
 
+fviz_nbclust(x = base1, FUNcluster = kmeans, method = "wss", k.max = 15, 
+             diss = get_dist(base1, method = "euclidean"), nstart = 50)
 
-clustermedia <- kmeans(base1[,2:12], centers=6) #centers es el número de clusters
+clustermedia <- kmeans(base1[,2:12], centers=) #centers es el número de clusters
 ####no se si dividir en 6 ya que la variable Race toma 6 valores
 
 fviz_cluster(clustermedia, base1[,2:12], geom = "point")
